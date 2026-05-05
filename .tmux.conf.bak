@@ -1,0 +1,85 @@
+# Use zsh as default
+set -g default-shell /bin/zsh
+
+# Enable 256-color and true-color support
+set -g default-terminal "screen-256color"
+set -ga terminal-overrides ",*256col*:Tc"
+
+# --- General Settings ---
+set -g set-clipboard on         # Synchronize with system clipboard
+set -g detach-on-destroy off    # Don't exit tmux when closing a session
+set -g escape-time 0            # No delay for ESC in Neovim
+set -g history-limit 1000000    # High history limit
+set -g mouse on                 # Mouse support
+set -g status-interval 3        # Refresh interval
+set -g allow-passthrough on     # Allow programs to bypass tmux
+set -g status-position bottom   # Keep status bar at the bottom
+
+# --- Key Bindings ---
+set -g prefix C-b
+bind C-b send-prefix
+
+# Quick Source
+unbind r
+bind r source-file ~/.config/tmux/tmux.conf
+
+# Window management
+unbind %
+bind \\ split-window -h -c "#{pane_current_path}"
+unbind \"
+bind - split-window -v -c "#{pane_current_path}"
+bind c new-window -c "#{pane_current_path}"
+
+# Pane Resizing
+bind -r j resize-pane -D 5
+bind -r k resize-pane -U 5
+bind -r l resize-pane -R 5
+bind -r h resize-pane -L 5
+bind -r m resize-pane -Z
+
+# --- Copy Mode & History (Fixed) ---
+set-window-option -g mode-keys vi
+
+# Better Copy Mode bindings
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle
+bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+bind-key -T copy-mode-vi Escape send-keys -X cancel
+
+# Don't exit copy mode when dragging with mouse
+unbind -T copy-mode-vi MouseDragEnd1Pane
+
+# Indexing
+set -g base-index 1
+set -g pane-base-index 1
+set -g renumber-windows on
+
+# --- Plugins ---
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'christoomey/vim-tmux-navigator'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @plugin 'hendrikmi/tmux-cpu-mem-monitor'
+
+# --- Theming (Geometric Balance) ---
+set -g status-left-length 100
+set -g status-style "fg=#D8DEE9,bg=default"
+
+# Status Left: Session Name (Turns WHITE when prefix is active)
+set -g status-left "#{?client_prefix,#[fg=#ffffff]#[bold],#[fg=#A3BE8C]#[bold]} #S #[fg=#D8DEE9,nobold] | "
+
+# Status Right: CPU, Mem, Time, Date
+set -g status-right "#[fg=#81A1C1] #{cpu} #[fg=#88C0D0]  #{mem} #[fg=#D8DEE9]  %H:%M #[fg=#ABB2BF]  %Y-%m-%d "
+
+# Active Window: No Underline, Bold Cyan
+set -g window-status-current-format "#[fg=#88C0D0,bold]  #I:#W#{?window_zoomed_flag, 󰍋 ,}"
+set -g window-status-format " #I:#W"
+
+# Message and Borders
+set -g message-style "fg=#D8DEE9,bg=default"
+set -g mode-style "fg=#3B4252,bg=#81A1C1"
+set -g pane-border-style "fg=#3B4252"
+set -g pane-active-border-style "fg=#A3BE8C"
+
+# Initialize TPM
+run '~/.tmux/plugins/tpm/tpm'
